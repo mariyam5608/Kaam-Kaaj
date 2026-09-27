@@ -1,0 +1,55 @@
+{
+  "jobs": [
+    {
+      "employerID": "24893831823361@lid",
+      "data": {
+        "Role": "loader",
+        "Location": "qasimabad",
+        "Working hours": "5-6",
+        "Salary/Fare": "1000/day",
+        "Special requirements": "must be physically fit"
+      },
+      "timestamp": "2026-09-27T09:25:45.086Z"
+    },
+    {
+      "employerID": "24893831823361@lid",
+      "data": {
+        "Role": "labourer",
+        "Location": "Karachi",
+        "Salary/Fare": "1000/day"
+      },
+      "timestamp": "2026-09-27T10:00:24.981Z"
+    },
+    {
+      "employerID": "107069290057775@lid",
+      "data": {},
+      "timestamp": "2026-09-27T11:09:06.345Z"
+    }
+  ],
+  "workers": [
+    {
+      "workerID": "146145389105267@lid",
+      "data": {
+        "Name": "abc",
+        "Age": "20",
+        "Location": "xyz",
+        "Available hours": "12am to 12pm",
+        "Skills/Experience": "programmer"
+      },
+      "timestamp": "2026-09-27T10:39:45.000Z"
+    },
+    {
+      "workerID": "24893831823361@lid",
+      "data": {
+        "Role": "",
+        "Location": "",
+        "Salary": "",
+        "Hours": "",
+        "Name": "",
+        "Age": "",
+        "Skills": ""
+      },
+      "timestamp": "2026-09-27T11:34:29.167Z"
+    }
+  ]
+}
