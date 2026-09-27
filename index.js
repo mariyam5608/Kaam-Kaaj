@@ -4,16 +4,46 @@ import qrcode from 'qrcode-terminal';
 import pino from 'pino';
 import fs from 'fs';
 import { Groq } from 'groq-sdk';
+import { localeFor, normalizeRoman, parseLanguageChoice, languageDirective, sanitizeForWhatsApp, westernDigits, MENU_WORDS, BROWSE_WORDS, APPLY_RE } from './language.js';
+import { t, fmt, renderFields, missingKeys } from './messages.js';
 
 // ------------------- CONFIGURATION -------------------
-const GROQ_API_KEY = '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'; 
+// Tiny .env loader (no dependency): KEY=VALUE lines, # comments. Real
+// environment variables always win.
+if (fs.existsSync('.env')) {
+    for (const line of fs.readFileSync('.env', 'utf8').split(/\r?\n/)) {
+        const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
+        if (m && process.env[m[1]] === undefined) {
+            process.env[m[1]] = m[2].replace(/^["']|["']$/g, '');
+        }
+    }
+}
+
+// The key used to be hard-coded in this file, which left it readable by anyone
+// who could see the repository. It now comes from the environment only.
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+if (!GROQ_API_KEY) {
+    console.error('❌ GROQ_API_KEY is not set. Copy .env.example to .env and paste your key, then start the bot again.');
+    process.exit(1);
+}
 const DB_FILE = './database.json';
 
 const groq = new Groq({ apiKey: GROQ_API_KEY });
 
-// Active fallback models order
-const TEXT_MODELS = ['openai/gpt-oss-20b', 'qwen/qwen3.8-27b'];
+// Fallback order: the 70B follows Urdu-script and Roman-Urdu instructions far
+// better than the smaller models; if it rate-limits we fall through to the two
+// this bot has always used.
+const TEXT_MODELS = ['meta-llama/llama-3.3-70b-versatile', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b'];
 const AUDIO_MODEL = 'whisper-large-v3-turbo';
+
+// One locale per sender: 'en' | 'roman' | 'ur'. Defaults to Roman Urdu, the
+// language this bot has always spoken.
+const locales = new Map();
+const localeOf = (senderID) => locales.get(senderID) || 'roman';
+
+if (missingKeys().length) {
+    console.warn('⚠️  Untranslated message keys:', missingKeys().join(', '));
+}
 // ------------------------------------------------------
 
 // Local Database Helpers
@@ -33,27 +63,39 @@ function saveDB(data) {
 }
 
 // Resilient AI Chat Completion with Auto-Fallback
-async function getAIIntent(userPrompt) {
+async function getAIIntent(userPrompt, locale = 'roman') {
+    const systemPrompt = `You are an AI assistant for a local labour marketplace in Hyderabad, Sindh. Users write in Urdu script, Roman Urdu, or English.
+
+Output ONLY a valid JSON object with these exact keys:
+- "intent": "HIRING" | "SEEKING" | "BROWSE" | "CHAT"
+- "reply": one short, warm sentence to the user
+- "extractedData": object with ONLY these keys, written exactly like this in English regardless of the user's language: Role, Location, Salary, Hours, Name, Age, Skills. Leave a value as "" when the user did not say it. Keep the user's own words and script inside the values.
+
+LANGUAGE RULES - these matter more than anything else:
+1. MIRROR THE USER. If they wrote Roman Urdu, reply in Roman Urdu. If they wrote اردو, reply in اردو. If they wrote English, reply in English.
+2. NEVER write Hindi or Devanagari (काम, चहिए, नमस्ते). This is a Pakistani marketplace: Urdu script only, never Devanagari.
+3. Always use Western digits 0-9, never ۰-۹.
+4. Keep "reply" under 30 words. No markdown, no bullet points, no headers - this goes into a WhatsApp text message.
+
+Example (user wrote Roman Urdu):
+{"intent": "HIRING", "reply": "Job record ho gayi hai!", "extractedData": {"Role": "Loader", "Location": "Qasimabad", "Salary": "1000", "Hours": "", "Name": "", "Age": "", "Skills": ""}}
+
+Example (user wrote اردو):
+{"intent": "HIRING", "reply": "آپ کی جاب محفوظ ہو گئی ہے!", "extractedData": {"Role": "مزدور", "Location": "قاسم آباد", "Salary": "1000", "Hours": "", "Name": "", "Age": "", "Skills": ""}}
+
+${languageDirective(locale)}`;
+
     for (const model of TEXT_MODELS) {
         try {
             const completion = await groq.chat.completions.create({
                 model: model,
                 messages: [
-                    {
-                        role: 'system',
-                        content: `You are an AI assistant for a local labor marketplace in Pakistan. You understand Urdu, Roman Urdu, and English.
-Analyze user input and output ONLY a valid JSON object with these exact keys:
-- "intent": "HIRING" | "SEEKING" | "BROWSE" | "CHAT"
-- "reply": Short friendly response in Roman Urdu
-- "extractedData": Object containing extracted fields (Role, Location, Salary, Hours, Name, Age, Skills)
-
-Example output:
-{"intent": "HIRING", "reply": "Job record ho gayi hai!", "extractedData": {"Role": "Loader", "Location": "Qasimabad", "Salary": "1000"}}`
-                    },
+                    { role: 'system', content: systemPrompt },
                     { role: 'user', content: userPrompt }
                 ],
                 response_format: { type: "json_object" },
-                max_tokens: 250 // Hard limit to prevent 429 RateLimit Errors
+                // Urdu answers run longer than Roman ones; 250 truncated them.
+                max_tokens: 400
             });
 
             return JSON.parse(completion.choices[0].message.content);
@@ -64,7 +106,7 @@ Example output:
     // Fail-safe object if AI is entirely unreachable
     return {
         intent: "CHAT",
-        reply: "Shukriya! Apni zaroorat tafseel se likhein ya voice note bhejein (e.g., 'Mujhe Qasimabad mein 1000/day par loader chahiye').",
+        reply: t(locale, 'aiUnavailable'),
         extractedData: {}
     };
 }
@@ -137,7 +179,7 @@ async function startWhatsAppGateway() {
                 console.log(`🗣️ Transcribed Voice Note: "${messageText}"`);
             } catch (err) {
                 console.error('Audio Transcription Error:', err.message);
-                await sock.sendMessage(senderID, { text: `❌ Awaaz saaf nahi aayi. Baraye meherbani dubara voice note bhejein ya text likhein.` });
+                await sock.sendMessage(senderID, { text: t(localeOf(senderID), 'voiceError') });
                 return;
             } finally {
                 if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath); // Prevent disk space accumulation
@@ -147,85 +189,108 @@ async function startWhatsAppGateway() {
         if (!messageText) return;
         console.log(`📩 Message from ${senderID}: "${messageText}"`);
         const db = loadDB();
-        const lowerText = messageText.toLowerCase();
+        // Westernise first: "apply ۱" and "درخواست ۱" must both parse as job 1.
+        const lowerText = westernDigits(messageText.toLowerCase().trim());
+        const norm = normalizeRoman(lowerText);
 
         // ⚡ INSTANT RULE SHORT-CIRCUITS (Bypasses AI API for instant speed & zero quota waste)
 
-        // Command: Menu / Greetings / Reset
-        if (['hi', 'hello', 'menu', 'start', '0', 'salam', 'assalam o alaikum'].includes(lowerText)) {
-            await sock.sendMessage(senderID, { 
-                text: `👋 *Khush Amdeed - Local Job Marketplace*\n\nAap kya karna chahte hain?\n\n*1️⃣* Job Post Karein (Mazdoor chahiye)\n*2️⃣* Kam Dhundhein (Worker profile)\n*3️⃣* Available Jobs Dekhein 🔍\n\n*(Voice note ya text mein apni zaroorat batayein)*` 
-            });
+        // Command: force a language. Words only — 1/2/3 belong to the menu.
+        const chosen = parseLanguageChoice(messageText);
+        if (chosen) {
+            locales.set(senderID, chosen);
+            await sock.sendMessage(senderID, { text: t(chosen, 'langSwitched') });
             return;
         }
 
-        // Command: Apply to Job (e.g., "apply 1")
-        if (lowerText.startsWith('apply')) {
-            const parts = lowerText.split(' ');
-            const jobIndex = parseInt(parts[1]) - 1;
-            
+        const isCommand = MENU_WORDS.has(norm) || BROWSE_WORDS.has(norm) || APPLY_RE.test(lowerText);
+        const detected = localeFor(messageText);
+        // Commands are short and look English ("3", "jobs", "apply 1"), so they
+        // must not flip a user's language. Urdu script is unambiguous, so it
+        // always wins even inside a command.
+        if (detected && (detected === 'ur' || !isCommand)) locales.set(senderID, detected);
+        const locale = localeOf(senderID);
+
+        // Command: Menu / Greetings / Reset
+        if (MENU_WORDS.has(norm)) {
+            await sock.sendMessage(senderID, { text: t(locale, 'menu') });
+            return;
+        }
+
+        // Command: Apply to Job (e.g., "apply 1" / "درخواست 1")
+        const applyMatch = lowerText.match(APPLY_RE);
+        if (applyMatch) {
+            const jobIndex = parseInt(applyMatch[1], 10) - 1;
+
             if (!isNaN(jobIndex) && db.jobs[jobIndex]) {
                 const targetJob = db.jobs[jobIndex];
-                
-                // Notify Employer
+
+                // Notify Employer — in the employer's own language, not the applicant's
                 await sock.sendMessage(targetJob.employerID, {
-                    text: `🔔 *Nayi Application!*\n\nEk worker aap ki job (*${targetJob.data['Role'] || 'Job'}*) ke liye rabta karna chahta hai.\n\n📱 Direct WhatsApp Link: wa.me/${senderID.split('@')[0]}`
+                    text: fmt(t(localeOf(targetJob.employerID), 'applyEmployer'), {
+                        role: targetJob.data['Role'] || 'Job',
+                        num: senderID.split('@')[0],
+                    })
                 });
 
                 // Confirm Worker
-                await sock.sendMessage(senderID, { 
-                    text: `✅ Aap ki darkhwas employer ko bhej di gayi hai! Wo aapse direct WhatsApp par rabta karein ge.` 
-                });
+                await sock.sendMessage(senderID, { text: t(locale, 'applyWorker') });
             } else {
-                await sock.sendMessage(senderID, { text: `❌ Sahi job number likhein. Misal: *apply 1*` });
+                await sock.sendMessage(senderID, { text: t(locale, 'applyError') });
             }
             return;
         }
 
         // Command: Explicit Browse Jobs
-        if (lowerText === '3' || lowerText === 'jobs' || lowerText === 'browse') {
+        if (BROWSE_WORDS.has(norm)) {
             if (db.jobs.length === 0) {
-                await sock.sendMessage(senderID, { text: `📭 Filhal koi active job available nahi hai.` });
+                await sock.sendMessage(senderID, { text: t(locale, 'browseEmpty') });
                 return;
             }
-            let response = `📋 *Available Active Jobs:*\n\n`;
+            let response = `${t(locale, 'browseHeader')}\n\n`;
             db.jobs.forEach((job, index) => {
-                response += `*Job #${index + 1}*\n`;
-                for (const [k, v] of Object.entries(job.data)) {
-                    response += `• *${k}*: ${v}\n`;
-                }
+                response += `${fmt(t(locale, 'browseJobHeader'), { n: index + 1 })}\n`;
+                response += `${renderFields(locale, job.data)}\n`;
                 response += `-------------------\n`;
             });
-            response += `\n💬 Apply karne ke liye likhein: *apply [Job Number]* (e.g. *apply 1*)`;
+            response += `\n${t(locale, 'browseFooter')}`;
             await sock.sendMessage(senderID, { text: response });
             return;
         }
 
         // 🧠 INTELLECTUAL AI PARSING (Only runs for freeform text or voice messages)
-        const aiResult = await getAIIntent(messageText);
+        const aiResult = await getAIIntent(messageText, locale);
         console.log('🤖 AI Extracted Result:', aiResult);
 
-        if (aiResult.intent === 'HIRING' && Object.keys(aiResult.extractedData || {}).length > 0) {
-            db.jobs.push({ employerID: senderID, data: aiResult.extractedData, timestamp: new Date().toISOString() });
+        // The model returns "" for fields the user never mentioned. Storing those
+        // blanks is what filled database.json with empty bullets.
+        const cleaned = Object.fromEntries(
+            Object.entries(aiResult.extractedData || {})
+                .map(([k, v]) => [k, sanitizeForWhatsApp(String(v ?? '')).slice(0, 200)])
+                .filter(([, v]) => v !== '')
+        );
+
+        if (aiResult.intent === 'HIRING' && Object.keys(cleaned).length > 0) {
+            db.jobs.push({ employerID: senderID, data: cleaned, timestamp: new Date().toISOString() });
             saveDB(db);
-            await sock.sendMessage(senderID, { 
-                text: `✅ *Aap Ki Job Post Ho Gayi!*\n\n` + 
-                      Object.entries(aiResult.extractedData).map(([k, v]) => `• *${k}*: ${v}`).join('\n') + 
-                      `\n\nActive jobs dekhne ke liye *3* ya *jobs* likhein.` 
+            await sock.sendMessage(senderID, {
+                text: `${t(locale, 'jobPostedTitle')}\n\n` +
+                      `${renderFields(locale, cleaned)}\n\n` +
+                      t(locale, 'jobPostedFooter')
             });
-        } 
-        else if (aiResult.intent === 'SEEKING' && Object.keys(aiResult.extractedData || {}).length > 0) {
-            db.workers.push({ workerID: senderID, data: aiResult.extractedData, timestamp: new Date().toISOString() });
+        }
+        else if (aiResult.intent === 'SEEKING' && Object.keys(cleaned).length > 0) {
+            db.workers.push({ workerID: senderID, data: cleaned, timestamp: new Date().toISOString() });
             saveDB(db);
-            await sock.sendMessage(senderID, { 
-                text: `✅ *Aap Ki Worker Profile Ban Gayi!*\n\n` + 
-                      Object.entries(aiResult.extractedData).map(([k, v]) => `• *${k}*: ${v}`).join('\n') + 
-                      `\n\nJobs dekhne aur apply karne ke liye *3* ya *jobs* likhein.` 
+            await sock.sendMessage(senderID, {
+                text: `${t(locale, 'workerSavedTitle')}\n\n` +
+                      `${renderFields(locale, cleaned)}\n\n` +
+                      t(locale, 'workerSavedFooter')
             });
-        } 
+        }
         else {
             // Friendly fallback response from AI
-            await sock.sendMessage(senderID, { text: aiResult.reply });
+            await sock.sendMessage(senderID, { text: sanitizeForWhatsApp(aiResult.reply) || t(locale, 'aiUnavailable') });
         }
     });
 }

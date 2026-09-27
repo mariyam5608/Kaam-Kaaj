@@ -1,0 +1,13 @@
+node_modules/
+
+# WhatsApp session credentials — anyone with this folder owns the number.
+auth_info_baileys/
+
+# Holds the Groq API key.
+.env
+
+# Real users' phone numbers, names and job details.
+database.json
+
+# Voice notes waiting to be transcribed.
+temp_*.ogg
