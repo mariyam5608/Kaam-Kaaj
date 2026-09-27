@@ -154,7 +154,7 @@ the QR code with the phone that will own the number.
 
 ## Team
 
-**HM^2** — Hasan Shahir, Minahil, and Marrium Burhan.
+**HM^2** — Hasan Shahir, Hadeeqa,  Marrium Burhan and Minahil
 
 Built for Imaginathon by banao.pk. Our city was assigned by the organisers:
 Hyderabad.
