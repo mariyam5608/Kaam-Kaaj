@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kaam Kaaj (کام کاج) | AI WhatsApp Labour Marketplace</title>
+  <meta name="description" content="Connecting daily-wage workers and local gig employers in Hyderabad, Sindh via WhatsApp with zero paperwork and Urdu voice notes.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Nastaliq+Urdu:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0f0d;
+      --card-bg: rgba(18, 27, 23, 0.75);
+      --card-border: rgba(46, 204, 113, 0.2);
+      --primary: #25d366;
+      --primary-hover: #1ebd5a;
+      --primary-glow: rgba(37, 211, 102, 0.35);
+      --text: #e8f5e9;
+      --text-muted: #8fa397;
+      --accent: #128c7e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(circle at 20% 20%, rgba(37, 211, 102, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(18, 140, 126, 0.12) 0%, transparent 50%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 820px;
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 24px;
+      padding: 48px 40px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(37, 211, 102, 0.05);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .badge-bar {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(37, 211, 102, 0.1);
+      border: 1px solid rgba(37, 211, 102, 0.25);
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #72f5a0;
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      background: #25d366;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #25d366;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #ffffff 30%, #72f5a0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .urdu-title {
+      font-family: 'Noto Nastaliq Urdu', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #25d366;
+      margin-bottom: 18px;
+      display: block;
+      line-height: 1.8;
+    }
+
+    p.lead {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 640px;
+      margin: 0 auto 32px auto;
+    }
+
+    .cta-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+      color: #05140b;
+      font-weight: 700;
+      box-shadow: 0 8px 24px var(--primary-glow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(37, 211, 102, 0.5);
+      background: linear-gradient(135deg, #2ee071 0%, #17a493 100%);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      text-align: left;
+      margin-top: 24px;
+      padding-top: 28px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .feature-card {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 20px;
+      transition: border-color 0.2s;
+    }
+
+    .feature-card:hover {
+      border-color: rgba(37, 211, 102, 0.3);
+    }
+
+    .feature-icon {
+      font-size: 1.6rem;
+      margin-bottom: 10px;
+    }
+
+    .feature-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+
+    .feature-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    footer {
+      margin-top: 32px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    footer a {
+      color: #25d366;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+      .container { padding: 32px 20px; }
+      h1 { font-size: 2.2rem; }
+      .urdu-title { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="badge-bar">
+      <span class="badge"><span class="badge-dot"></span> System Live & Operational</span>
+      <span class="badge">Imaginathon 2026 &bull; Hyderabad</span>
+      <span class="badge">Team HM²</span>
+    </div>
+
+    <h1>Kaam Kaaj</h1>
+    <span class="urdu-title">کام کاج — حیدرآباد</span>
+
+    <p class="lead">
+      Connecting daily-wage workers and local gig employers across Hyderabad, Sindh through WhatsApp. Zero paperwork, Urdu voice notes, and instant language mirroring.
+    </p>
+
+    <div class="cta-group">
+      <a href="https://wa.me/966554049427" class="btn btn-primary" target="_blank" rel="noopener">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.311.045-.698.083-2.27-.565-1.928-.796-3.168-2.76-3.264-2.888-.095-.128-.781-1.039-.781-1.981 0-.943.493-1.408.669-1.602.176-.194.385-.242.513-.242.128 0 .256.002.368.007.118.006.276-.045.432.331.16.386.545 1.332.593 1.43.048.097.08.21.016.339-.064.13-.096.21-.192.323-.096.113-.203.253-.29.339-.096.096-.196.2-.085.39.112.19.497.818 1.066 1.326.732.651 1.349.853 1.541.949.192.096.305.08.417-.048.113-.13.481-.56.609-.753.129-.193.257-.161.433-.097.176.065 1.121.529 1.314.625.192.097.32.145.368.226.048.081.048.469-.096.874z"/>
+        </svg>
+        Launch WhatsApp Bot
+      </a>
+      <a href="https://github.com/mariyam5608/Kaam-Kaaj" class="btn btn-secondary" target="_blank" rel="noopener">
+        View Code on GitHub
+      </a>
+    </div>
+
+    <div class="grid">
+      <div class="feature-card">
+        <div class="feature-icon">🎙️</div>
+        <div class="feature-title">Urdu Voice Notes</div>
+        <div class="feature-desc">Transcribed with Whisper AI so informal workers can register and apply naturally without typing.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌐</div>
+        <div class="feature-title">3-Language Mirroring</div>
+        <div class="feature-desc">Replies in Urdu script, Roman Urdu, or English automatically without requiring menu selection.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">Zero Paperwork</div>
+        <div class="feature-desc">No CV, no email, no app download. Post gigs or apply in 5 conversational questions.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">☁️</div>
+        <div class="feature-title">Dual Architecture</div>
+        <div class="feature-desc">Live Baileys gateway for open testing + Serverless Meta Cloud API on Vercel (/webhook).</div>
+      </div>
+    </div>
+
+    <footer>
+      Built for <strong>Imaginathon 2026</strong> by banao.pk &bull; Team <strong>HM²</strong><br>
+      API Webhook Endpoint: <code style="color: #25d366;">/webhook</code>
+    </footer>
+  </div>
+
+</body>
+</html>
