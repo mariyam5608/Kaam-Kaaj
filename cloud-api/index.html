@@ -3,22 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kaam Kaaj (کام کاج) | AI WhatsApp Labour Marketplace</title>
-  <meta name="description" content="Connecting daily-wage workers and local gig employers in Hyderabad, Sindh via WhatsApp with zero paperwork and Urdu voice notes.">
+  <title>Kaam Kaaj — WhatsApp Labour Marketplace for Hyderabad</title>
+  <meta name="description" content="Connecting daily-wage workers and local gig employers across Hyderabad, Sindh via WhatsApp. Zero paperwork, automated Urdu mirroring, and Whisper voice transcription.">
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Nastaliq+Urdu:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@100;200;300;400;500&family=Noto+Nastaliq+Urdu:wght@300;400&family=Noto+Sans+Arabic:wght@200;300;400&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --bg: #0a0f0d;
-      --card-bg: rgba(18, 27, 23, 0.75);
-      --card-border: rgba(46, 204, 113, 0.2);
-      --primary: #25d366;
-      --primary-hover: #1ebd5a;
-      --primary-glow: rgba(37, 211, 102, 0.35);
-      --text: #e8f5e9;
-      --text-muted: #8fa397;
-      --accent: #128c7e;
+      --bg: #060807;
+      --surface: #0b0f0d;
+      --surface-hover: #101613;
+      --border: rgba(255, 255, 255, 0.06);
+      --border-focus: rgba(16, 185, 129, 0.3);
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --accent: #34d399;
+      --text: #f3f4f6;
+      --text-muted: #94a3b8;
+      --text-faint: #64748b;
+      --max-width: 1060px;
     }
 
     * {
@@ -27,263 +32,715 @@
       padding: 0;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
-      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-weight: 200;
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--text);
       background-color: var(--bg);
       background-image: 
-        radial-gradient(circle at 20% 20%, rgba(37, 211, 102, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 80% 80%, rgba(18, 140, 126, 0.12) 0%, transparent 50%);
-      color: var(--text);
-      min-height: 100vh;
+        radial-gradient(ellipse 70% 50% at 0% 0%, rgba(16, 185, 129, 0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(5, 150, 105, 0.03) 0%, transparent 60%);
+      background-attachment: fixed;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-align: left;
+    }
+
+    /* Top Navigation */
+    .nav-wrapper {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(6, 8, 7, 0.82);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 16px 28px;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 24px;
-      line-height: 1.6;
+      justify-content: space-between;
     }
 
-    .container {
-      max-width: 820px;
-      width: 100%;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-radius: 24px;
-      padding: 48px 40px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(37, 211, 102, 0.05);
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .badge-bar {
+    .brand {
       display: flex;
+      align-items: baseline;
       gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 24px;
+      text-decoration: none;
+      color: var(--text);
     }
 
-    .badge {
+    .brand-name {
+      font-size: 1.1rem;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+    }
+
+    .brand-urdu {
+      font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', serif;
+      font-size: 1.05rem;
+      font-weight: 300;
+      color: var(--accent);
+      line-height: 1;
+      opacity: 0.9;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .nav-link {
+      font-size: 0.85rem;
+      font-weight: 200;
+      letter-spacing: 0.01em;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .nav-link:hover {
+      color: #ffffff;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-cta {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 6px 14px;
-      background: rgba(37, 211, 102, 0.1);
-      border: 1px solid rgba(37, 211, 102, 0.25);
-      border-radius: 999px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: #72f5a0;
+      padding: 7px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 300;
+      color: var(--text);
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.02);
+      transition: all 0.2s ease;
     }
 
-    .badge-dot {
-      width: 8px;
-      height: 8px;
-      background: #25d366;
-      border-radius: 50%;
-      box-shadow: 0 0 10px #25d366;
-      animation: pulse 2s infinite;
+    .nav-cta:hover {
+      border-color: var(--primary);
+      color: #ffffff;
+      background: rgba(16, 185, 129, 0.06);
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.85); }
+    .nav-cta-demo {
+      border-color: rgba(52, 211, 153, 0.25);
+      background: rgba(52, 211, 153, 0.05);
+      color: var(--accent);
     }
 
-    h1 {
-      font-size: 2.8rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      margin-bottom: 12px;
-      background: linear-gradient(135deg, #ffffff 30%, #72f5a0 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .nav-cta-demo:hover {
+      border-color: var(--accent);
+      background: rgba(52, 211, 153, 0.12);
+      color: #ffffff;
     }
 
-    .urdu-title {
-      font-family: 'Noto Nastaliq Urdu', serif;
-      font-size: 2rem;
-      font-weight: 700;
-      color: #25d366;
-      margin-bottom: 18px;
+    /* Main Container */
+    .page-container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 28px;
+      text-align: left;
+    }
+
+    /* Hero Section - Clean, Left-Aligned, Thin Typography */
+    .hero-section {
+      padding: 104px 0 72px 0;
+      text-align: left;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.72rem;
+      font-weight: 300;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 22px;
       display: block;
-      line-height: 1.8;
+      opacity: 0.9;
     }
 
-    p.lead {
+    h1.hero-title {
+      font-size: 3.5rem;
+      font-weight: 200;
+      letter-spacing: -0.045em;
+      line-height: 1.12;
+      color: #ffffff;
+      margin-bottom: 14px;
+      max-width: 860px;
+      text-align: left;
+    }
+
+    .hero-urdu {
+      display: block;
+      font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', serif;
+      font-size: 1.7rem;
+      font-weight: 300;
+      color: var(--accent);
+      margin-bottom: 28px;
+      line-height: 1.6;
+      text-align: left;
+      opacity: 0.92;
+    }
+
+    p.hero-lead {
       font-size: 1.15rem;
+      font-weight: 200;
       color: var(--text-muted);
-      max-width: 640px;
-      margin: 0 auto 32px auto;
+      max-width: 700px;
+      margin-bottom: 42px;
+      line-height: 1.85;
+      text-align: left;
     }
 
-    .cta-group {
+    /* Action Buttons */
+    .btn-group {
       display: flex;
+      align-items: center;
       gap: 16px;
-      justify-content: center;
       flex-wrap: wrap;
-      margin-bottom: 40px;
+      margin-bottom: 72px;
+      justify-content: flex-start;
     }
 
     .btn {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
       gap: 10px;
-      padding: 14px 28px;
-      border-radius: 14px;
-      font-size: 1rem;
-      font-weight: 600;
+      padding: 12px 24px;
+      border-radius: 9px;
+      font-size: 0.9rem;
+      font-weight: 300;
+      letter-spacing: 0.01em;
       text-decoration: none;
-      transition: all 0.25s ease;
+      transition: all 0.2s ease;
       cursor: pointer;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
-      color: #05140b;
-      font-weight: 700;
-      box-shadow: 0 8px 24px var(--primary-glow);
+      background: var(--primary);
+      color: #031207;
+      border: 1px solid var(--primary);
     }
 
     .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 30px rgba(37, 211, 102, 0.5);
-      background: linear-gradient(135deg, #2ee071 0%, #17a493 100%);
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+      color: #ffffff;
     }
 
     .btn-secondary {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: transparent;
       color: var(--text);
+      border: 1px solid var(--border);
     }
 
     .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.1);
-      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.02);
     }
 
-    .grid {
+    /* Metrics Strip */
+    .metrics-strip {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 36px;
+      padding-top: 44px;
+      border-top: 1px solid var(--border);
+      margin-bottom: 96px;
       text-align: left;
-      margin-top: 24px;
-      padding-top: 28px;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .feature-card {
-      background: rgba(0, 0, 0, 0.25);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 16px;
-      padding: 20px;
-      transition: border-color 0.2s;
+    .metric-item {
+      text-align: left;
     }
 
-    .feature-card:hover {
-      border-color: rgba(37, 211, 102, 0.3);
+    .metric-value {
+      font-size: 2.75rem;
+      font-weight: 100;
+      letter-spacing: -0.05em;
+      color: #ffffff;
+      line-height: 1.15;
+      margin-bottom: 6px;
+      font-variant-numeric: tabular-nums;
     }
 
-    .feature-icon {
-      font-size: 1.6rem;
+    .metric-label {
+      font-size: 0.82rem;
+      font-weight: 200;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* Section Styling */
+    section {
+      padding: 68px 0;
+      border-top: 1px solid var(--border);
+      text-align: left;
+    }
+
+    .section-header {
+      margin-bottom: 38px;
+      text-align: left;
+    }
+
+    .section-title {
+      font-size: 1.95rem;
+      font-weight: 200;
+      letter-spacing: -0.035em;
+      color: #ffffff;
       margin-bottom: 10px;
     }
 
-    .feature-title {
+    .section-desc {
       font-size: 0.95rem;
-      font-weight: 600;
+      font-weight: 200;
+      color: var(--text-muted);
+      max-width: 620px;
+      line-height: 1.7;
+    }
+
+    /* Dual Marketplace Grid */
+    .market-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+    }
+
+    .market-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 32px;
+      text-align: left;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .market-card:hover {
+      border-color: var(--border-focus);
+      background: var(--surface-hover);
+    }
+
+    .card-label {
+      font-size: 0.72rem;
+      font-weight: 300;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 300;
+      letter-spacing: -0.02em;
       color: #ffffff;
-      margin-bottom: 6px;
+      margin-bottom: 18px;
+    }
+
+    .steps-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    .step-index {
+      font-size: 0.72rem;
+      font-weight: 300;
+      color: var(--text-faint);
+      padding-top: 3px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .step-text strong {
+      font-weight: 300;
+      color: var(--text);
+    }
+
+    /* Capabilities 4-column Grid */
+    .capabilities-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      text-align: left;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .feature-card:hover {
+      border-color: var(--border-focus);
+      background: var(--surface-hover);
+    }
+
+    .feature-number {
+      font-size: 0.72rem;
+      font-weight: 300;
+      color: var(--text-faint);
+      margin-bottom: 16px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .feature-title {
+      font-size: 1.05rem;
+      font-weight: 300;
+      letter-spacing: -0.015em;
+      color: #ffffff;
+      margin-bottom: 8px;
     }
 
     .feature-desc {
       font-size: 0.85rem;
+      font-weight: 200;
       color: var(--text-muted);
-      line-height: 1.4;
+      line-height: 1.65;
     }
 
-    footer {
-      margin-top: 32px;
+    /* Technical Architecture Specs */
+    .tech-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 32px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 32px;
+      text-align: left;
+    }
+
+    .tech-column h4 {
+      font-size: 0.95rem;
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      color: #ffffff;
+      margin-bottom: 12px;
+    }
+
+    .tech-column p {
       font-size: 0.85rem;
+      font-weight: 200;
       color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+
+    .code-pill {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.78rem;
+      font-weight: 300;
+      color: var(--accent);
+      background: rgba(16, 185, 129, 0.06);
+      border: 1px solid rgba(16, 185, 129, 0.16);
+      padding: 2px 7px;
+      border-radius: 5px;
+    }
+
+    /* Footer */
+    footer {
+      padding: 56px 0;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+      font-size: 0.82rem;
+      font-weight: 200;
+      color: var(--text-faint);
+      text-align: left;
     }
 
     footer a {
-      color: #25d366;
+      color: var(--text-muted);
       text-decoration: none;
+      transition: color 0.2s ease;
     }
 
     footer a:hover {
-      text-decoration: underline;
+      color: #ffffff;
     }
 
-    @media (max-width: 600px) {
-      .container { padding: 32px 20px; }
-      h1 { font-size: 2.2rem; }
-      .urdu-title { font-size: 1.6rem; }
+    .footer-credits strong {
+      font-weight: 300;
+      color: var(--text-muted);
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      h1.hero-title { font-size: 2.5rem; }
+      .hero-urdu { font-size: 1.4rem; }
+      .metrics-strip { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+      .tech-box { padding: 24px; }
+      footer { flex-direction: column; gap: 14px; text-align: center; }
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <div class="badge-bar">
-      <span class="badge"><span class="badge-dot"></span> System Live & Operational</span>
-      <span class="badge">Imaginathon 2026 &bull; Hyderabad</span>
-      <span class="badge">Team HM²</span>
-    </div>
-
-    <h1>Kaam Kaaj</h1>
-    <span class="urdu-title">کام کاج — حیدرآباد</span>
-
-    <p class="lead">
-      Connecting daily-wage workers and local gig employers across Hyderabad, Sindh through WhatsApp. Zero paperwork, Urdu voice notes, and instant language mirroring.
-    </p>
-
-    <div class="cta-group">
-      <a href="https://wa.me/966554049427" class="btn btn-primary" target="_blank" rel="noopener">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.311.045-.698.083-2.27-.565-1.928-.796-3.168-2.76-3.264-2.888-.095-.128-.781-1.039-.781-1.981 0-.943.493-1.408.669-1.602.176-.194.385-.242.513-.242.128 0 .256.002.368.007.118.006.276-.045.432.331.16.386.545 1.332.593 1.43.048.097.08.21.016.339-.064.13-.096.21-.192.323-.096.113-.203.253-.29.339-.096.096-.196.2-.085.39.112.19.497.818 1.066 1.326.732.651 1.349.853 1.541.949.192.096.305.08.417-.048.113-.13.481-.56.609-.753.129-.193.257-.161.433-.097.176.065 1.121.529 1.314.625.192.097.32.145.368.226.048.081.048.469-.096.874z"/>
-        </svg>
-        Launch WhatsApp Bot
+  <!-- Minimal Navigation Bar -->
+  <header class="nav-wrapper">
+    <div class="nav-container">
+      <a href="#" class="brand">
+        <span class="brand-name">Kaam Kaaj</span>
+        <span class="brand-urdu">کام کاج</span>
       </a>
-      <a href="https://github.com/mariyam5608/Kaam-Kaaj" class="btn btn-secondary" target="_blank" rel="noopener">
-        View Code on GitHub
-      </a>
-    </div>
 
-    <div class="grid">
-      <div class="feature-card">
-        <div class="feature-icon">🎙️</div>
-        <div class="feature-title">Urdu Voice Notes</div>
-        <div class="feature-desc">Transcribed with Whisper AI so informal workers can register and apply naturally without typing.</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🌐</div>
-        <div class="feature-title">3-Language Mirroring</div>
-        <div class="feature-desc">Replies in Urdu script, Roman Urdu, or English automatically without requiring menu selection.</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">⚡</div>
-        <div class="feature-title">Zero Paperwork</div>
-        <div class="feature-desc">No CV, no email, no app download. Post gigs or apply in 5 conversational questions.</div>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">☁️</div>
-        <div class="feature-title">Dual Architecture</div>
-        <div class="feature-desc">Live Baileys gateway for open testing + Serverless Meta Cloud API on Vercel (/webhook).</div>
+      <nav class="nav-links">
+        <a href="#how-it-works" class="nav-link">How it works</a>
+        <a href="#capabilities" class="nav-link">Capabilities</a>
+        <a href="#architecture" class="nav-link">Architecture</a>
+        <a href="https://drive.google.com/drive/folders/1dVoasdcCZ3Rz2WOSTqXyVt_Lk9AOpeuc" class="nav-link" target="_blank" rel="noopener">Live Demo</a>
+        <a href="https://github.com/mariyam5608/Kaam-Kaaj" class="nav-link" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="https://drive.google.com/drive/folders/1dVoasdcCZ3Rz2WOSTqXyVt_Lk9AOpeuc" class="nav-cta nav-cta-demo" target="_blank" rel="noopener">
+          <span>Live Demo</span>
+          <span aria-hidden="true">&nearr;</span>
+        </a>
+        <a href="https://wa.me/966554049427" class="nav-cta" target="_blank" rel="noopener">
+          <span>Open WhatsApp</span>
+          <span aria-hidden="true">&nearr;</span>
+        </a>
       </div>
     </div>
+  </header>
 
+  <main class="page-container">
+
+    <!-- Hero Section - Left Aligned, Clean, Thin Fonts -->
+    <section class="hero-section" id="overview">
+      <span class="hero-eyebrow">Hyderabad, Sindh &bull; Local Labour Marketplace</span>
+      <h1 class="hero-title">Work for everyone in Hyderabad.</h1>
+      <span class="hero-urdu">کام کاج — بغیر کسی کاغذی کارروائی کے، سیدھا واٹس ایپ پر</span>
+
+      <p class="hero-lead">
+        A lightweight WhatsApp marketplace connecting informal workers and local employers across Hyderabad, Sindh. No forms to fill, no CVs to write, and no apps to install. Built with automatic script mirroring for Roman Urdu, Urdu script, and Whisper AI voice transcription.
+      </p>
+
+      <div class="btn-group">
+        <a href="https://wa.me/966554049427" class="btn btn-primary" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.311.045-.698.083-2.27-.565-1.928-.796-3.168-2.76-3.264-2.888-.095-.128-.781-1.039-.781-1.981 0-.943.493-1.408.669-1.602.176-.194.385-.242.513-.242.128 0 .256.002.368.007.118.006.276-.045.432.331.16.386.545 1.332.593 1.43.048.097.08.21.016.339-.064.13-.096.21-.192.323-.096.113-.203.253-.29.339-.096.096-.196.2-.085.39.112.19.497.818 1.066 1.326.732.651 1.349.853 1.541.949.192.096.305.08.417-.048.113-.13.481-.56.609-.753.129-.193.257-.161.433-.097.176.065 1.121.529 1.314.625.192.097.32.145.368.226.048.081.048.469-.096.874z"/>
+          </svg>
+          Connect on WhatsApp
+        </a>
+
+        <a href="https://drive.google.com/drive/folders/1dVoasdcCZ3Rz2WOSTqXyVt_Lk9AOpeuc" class="btn btn-secondary" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M7.71 3.502L1.15 15l3.43 5.998 6.56-11.496H7.71zM9.73 15.002L6.3 21h13.12l3.43-5.998H9.73zm13.12-2.004L16.29 1.5H9.72l6.56 11.498h6.57z"/>
+          </svg>
+          Live Demo (Drive)
+        </a>
+
+        <a href="https://github.com/mariyam5608/Kaam-Kaaj" class="btn btn-secondary" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          View Codebase on GitHub
+        </a>
+      </div>
+
+      <!-- Left-aligned Key Metrics -->
+      <div class="metrics-strip">
+        <div class="metric-item">
+          <div class="metric-value">0</div>
+          <div class="metric-label">Paperwork, CVs, or email accounts required.</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-value">3</div>
+          <div class="metric-label">Languages dynamically mirrored (Roman Urdu, اردو, English).</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-value">100%</div>
+          <div class="metric-label">WhatsApp native — from voice note to direct phone call.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works">
+      <div class="section-header">
+        <h2 class="section-title">Two sides of Hyderabad's market.</h2>
+        <p class="section-desc">
+          Designed specifically for how employers and workers already communicate every day on their phones.
+        </p>
+      </div>
+
+      <div class="market-grid">
+        <!-- Employers Card -->
+        <div class="market-card">
+          <span class="card-label">For Employers</span>
+          <h3 class="card-title">Post a gig in four fields</h3>
+          <ul class="steps-list">
+            <li class="step-item">
+              <span class="step-index">01</span>
+              <span class="step-text"><strong>Send a natural message:</strong> Type or voice message what you need (e.g. <em>"do mazdoor chahiye qasimabad me, Rs. 1,000 dihari"</em>).</span>
+            </li>
+            <li class="step-item">
+              <span class="step-index">02</span>
+              <span class="step-text"><strong>Automatic extraction:</strong> The AI parses role, area, hours, and fare in Pakistani Rupees into your listing.</span>
+            </li>
+            <li class="step-item">
+              <span class="step-index">03</span>
+              <span class="step-text"><strong>Direct phone notification:</strong> As soon as a worker applies, receive their number immediately.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Workers Card -->
+        <div class="market-card">
+          <span class="card-label">For Workers</span>
+          <h3 class="card-title">Find work without a resume</h3>
+          <ul class="steps-list">
+            <li class="step-item">
+              <span class="step-index">01</span>
+              <span class="step-text"><strong>Voice or text registration:</strong> Send a quick voice note with your name, area, and skills.</span>
+            </li>
+            <li class="step-item">
+              <span class="step-index">02</span>
+              <span class="step-text"><strong>Instant job listings:</strong> Request active gigs anytime with simple prompts like <em>"jobs"</em>, <em>"kaam"</em>, or <em>"dihari"</em>.</span>
+            </li>
+            <li class="step-item">
+              <span class="step-index">03</span>
+              <span class="step-text"><strong>One-message apply:</strong> Reply with <em>"apply 1"</em> or <em>"#1"</em> to put your phone number in front of the employer.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Core Capabilities -->
+    <section id="capabilities">
+      <div class="section-header">
+        <h2 class="section-title">Core capabilities</h2>
+        <p class="section-desc">
+          Built to solve real language and accessibility hurdles in Pakistan's informal labour economy.
+        </p>
+      </div>
+
+      <div class="capabilities-grid">
+        <div class="feature-card">
+          <div class="feature-number">01</div>
+          <h3 class="feature-title">Urdu Voice Notes</h3>
+          <p class="feature-desc">
+            Transcribed using OpenAI Whisper so workers who cannot read or write English can register and apply naturally.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-number">02</div>
+          <h3 class="feature-title">Frictionless Mirroring</h3>
+          <p class="feature-desc">
+            Speaks back in Roman Urdu, Urdu script, or English automatically without requiring menu selections or settings.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-number">03</div>
+          <h3 class="feature-title">Zero Paperwork</h3>
+          <p class="feature-desc">
+            No accounts, no portals, and no CV writing. Both sides reach a direct phone call in under two minutes.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-number">04</div>
+          <h3 class="feature-title">Anti-Devanagari Guard</h3>
+          <p class="feature-desc">
+            Carefully prompted and temperature-controlled to prevent language models from drifting into Hindi or Devanagari.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Architecture & Endpoints -->
+    <section id="architecture">
+      <div class="section-header">
+        <h2 class="section-title">Architecture & persistence</h2>
+        <p class="section-desc">
+          Two distinct backends tailored for different operational and deployment environments.
+        </p>
+      </div>
+
+      <div class="tech-box">
+        <div class="tech-column">
+          <h4>Vercel Serverless (Meta Cloud API)</h4>
+          <p>
+            Zero-state serverless HTTP endpoint live at <span class="code-pill">kaamkaaj-whatsapp.vercel.app</span>. Handles webhooks signed with HMAC-SHA256 from Meta's official WhatsApp Business Cloud API.
+          </p>
+          <p>
+            Webhook: <span class="code-pill">/webhook</span>
+          </p>
+        </div>
+
+        <div class="tech-column">
+          <h4>Baileys Persistent Gateway</h4>
+          <p>
+            Direct WebSocket connection for local phone numbers. Manages real-time voice media downloads, Whisper audio decoding, and instant short-circuit rule execution.
+          </p>
+          <p>
+            Persistence: <span class="code-pill">Supabase PostgreSQL</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Minimal Footer -->
     <footer>
-      Built for <strong>Imaginathon 2026</strong> by banao.pk &bull; Team <strong>HM²</strong><br>
-      API Webhook Endpoint: <code style="color: #25d366;">/webhook</code>
+      <div class="footer-credits">
+        Built for <strong>Imaginathon 2026</strong> by banao.pk &bull; Team <strong>HM²</strong> (Hyderabad)
+      </div>
+      <div class="footer-links">
+        <a href="https://drive.google.com/drive/folders/1dVoasdcCZ3Rz2WOSTqXyVt_Lk9AOpeuc" target="_blank" rel="noopener">Live Demo (Drive)</a>
+        <span style="opacity: 0.3;">&bull;</span>
+        <a href="https://github.com/mariyam5608/Kaam-Kaaj" target="_blank" rel="noopener">GitHub Repository</a>
+      </div>
     </footer>
-  </div>
+
+  </main>
 
 </body>
 </html>

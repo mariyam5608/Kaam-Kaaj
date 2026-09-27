@@ -18,7 +18,9 @@ const ROMAN_STRONG = new Set([
   'kaun', 'kon', 'kyun', 'kion', 'hoga', 'hogi', 'honge', 'sakta', 'sakti',
   'sakte', 'tha', 'thi', 'thay', 'hain', 'hy', 'hyn', 'theek', 'thik',
   'kaam', 'paise', 'paisay', 'rupay', 'haan', 'walaikum', 'mazdoor',
-  'mazdoori', 'darkhwas', 'zaroorat',
+  'mazdoori', 'darkhwas', 'darkhwast', 'zaroorat', 'dihari', 'dihadi',
+  'dehari', 'karigar', 'mistri', 'thekedar', 'tankhwah', 'ujrat', 'rozgar',
+  'mulazmat', 'beldar', 'chowkidar',
 ]);
 
 // Short words that are also plausible English or typos. Score 1 each.
@@ -26,7 +28,7 @@ const ROMAN_WEAK = new Set([
   'hai', 'aur', 'or', 'mein', 'main', 'mera', 'meri', 'mere', 'tum', 'tumhe',
   'hum', 'woh', 'wo', 'ye', 'yeh', 'se', 'ko', 'ka', 'ki', 'ke', 'liye',
   'leye', 'gaya', 'gayi', 'gaye', 'kab', 'han', 'ji', 'na', 'ab', 'yahan',
-  'wahan', 'kam', 'mil', 'karo', 'kar', 'dena', 'do', 'chahiye',
+  'wahan', 'kam', 'mil', 'karo', 'kar', 'dena', 'do', 'chahiye', 'rs', 'pkr',
 ]);
 
 // Variant spellings collapsed to one canonical form, so keyword rules match no
@@ -37,7 +39,7 @@ const ROMAN_CANONICAL = {
   hai: ['hy', 'hae'],
   main: ['mein', 'mn', 'mai'],
   kaam: ['kam', 'kaj', 'kaaj'],
-  chahiye: ['chahye', 'chaiye', 'chahie', 'chaheye', 'chy'],
+  chahiye: ['chahye', 'chaiye', 'chahie', 'chaheye', 'chy', 'chahyen', 'chayie'],
   karna: ['krna', 'karnaa'],
   karta: ['krta'],
   karti: ['krti'],
@@ -48,13 +50,19 @@ const ROMAN_CANONICAL = {
   kahan: ['kaha', 'kahn'],
   mujhe: ['mujy', 'mujhay', 'muje', 'mje', 'mjhe'],
   tumhe: ['tumhy', 'tumhay', 'tje', 'tjhe'],
-  paise: ['paisa', 'paisay', 'rupay', 'rupaye'],
+  paise: ['paisa', 'paisay', 'rupay', 'rupaye', 'rupee', 'rupees'],
   zaroorat: ['zrurt', 'zarurat'],
   haan: ['han', 'haa'],
   shukriya: ['shukria', 'shukrya'],
   salam: ['assalam', 'aslam', 'slm'],
   ilaqa: ['area', 'mohalla', 'ilaaka'],
-  mazdoor: ['mazdoori', 'mazdoor'],
+  mazdoor: ['mazdoori', 'labour', 'laborer', 'mazdor'],
+  dihari: ['dihadi', 'dehari', 'dehadi', 'diharee'],
+  karigar: ['kareegar', 'kaarigar'],
+  mistri: ['mistry', 'mistree'],
+  thekedar: ['thekedaar', 'thaikedar'],
+  tankhwah: ['tankha', 'tankwah', 'ujrat', 'salary'],
+  darkhwas: ['darkhwast', 'darkhast', 'apply'],
 };
 
 const VARIANT_LOOKUP = new Map();
@@ -110,17 +118,85 @@ export function localeFor(text) {
 // "aslam" and "slm" all land on the same entry.
 export const MENU_WORDS = new Set([
   'hi', 'hello', 'menu', 'start', '0', 'salam', 'assalam o alaikum',
-  'aoa', 'adaab', 'مینو', 'السلام علیکم', 'آداب',
+  'aoa', 'adaab', 'shuru', 'madad', 'help', 'مینو', 'السلام علیکم', 'آداب', 'سلام', 'شروع',
 ].map(normalizeRoman));
 
 export const BROWSE_WORDS = new Set([
   '3', 'jobs', 'browse', 'list', 'job list', 'jobs list', 'joblist',
-  'list bhejdein', 'list bhejo', 'kaam ki list', 'نوکریاں', 'کام'
+  'list bhejdein', 'list bhejo', 'kaam ki list', 'kaam dikhao', 'kam dikhao',
+  'jobs dikhao', 'kam dekhna', 'kaam dekhna', 'jobs dekhna',
+  'jobs dikhayein', 'jobs dikha dein', 'kaam dikha dein',
+  'jobs dikha sktay hain', 'jobs dikha sakte hain',
+  'kaam dikha sktay hain', 'kaam dikha sakte hain',
+  'show jobs', 'see jobs', 'view jobs', 'available jobs', 'show me jobs',
+  'mein job k liye apply krna chahta hn', 'job k liye apply krna chahta hn',
+  'job k liye apply karna chahta hoon', 'mujhe kaam chahiye', 'kaam chahiye',
+  'rozgar chahiye', 'naukri chahiye',
+  'dihari', 'rozgar', 'mulazmat', 'نوکریاں', 'کام', 'ملازمت', 'کام کی لسٹ'
 ].map(normalizeRoman));
 
-// "apply 1" / "apply #1" / "#1" / "darkhwas 2" / "درخواست 3" / "job 1"
+// "apply 1" / "apply #1" / "#1" / "job id 1" / "apply to 1" / "darkhwas 2" / "درخواست 3"
 // run westernDigits() on the message first or Urdu-script numerals will never match.
-export const APPLY_RE = /^(?:apply|darkhwas|درخواست|job)\s*#?\s*(\d*)|^\s*#\s*(\d+)/i;
+export const APPLY_RE = /^(?:apply\s*(?:to|for|on)?|darkhwas|darkhwast|درخواست|job\s*(?:id|no|number)?|kam|kaam)\s*[:#]?\s*(\d*)|^\s*#\s*(\d+)/i;
+
+// Checks if user message means proceeding or affirming with an application
+export function isProceedOrAffirmation(text) {
+  if (!text || typeof text !== 'string') return false;
+  const clean = normalizeRoman(westernDigits(text.toLowerCase().trim()));
+  if (!clean) return false;
+
+  const EXACT_PROCEED = new Set([
+    'proceed', 'id like to proceed', 'i would like to proceed', 'like to proceed',
+    'yes', 'haan', 'han', 'ji', 'jee', 'jee haan', 'ji haan', 'theek hai',
+    'thik hai', 'ok', 'okay', 'kar do', 'kr do', 'kar dein', 'kr dein',
+    'bhej do', 'bhej dein', 'done', 'apply', 'apply kar do', 'apply kr do',
+    'aage barhein', 'aage badhein', 'aage chalo', 'bilkul'
+  ].map(normalizeRoman));
+
+  if (EXACT_PROCEED.has(clean)) return true;
+
+  const PROCEED_PATTERNS = [
+    /\b(?:proceed|aage\s*b[ar]dh)/i,
+    /\b(?:is|ye|yeh|iss)\s*(?:job|kam|kaam)?\s*(?:k\s*liye|ke\s*liye|par|pe)?\s*apply/i,
+    /\bapply\s*(?:for\s*(?:this|it)|karna|krna|kar\s*do|kr\s*do|karden|krdein)/i,
+    /\b(?:rabta\s*karwa|bhej\s*d[eo]|darkhwas[t]?\s*bhej)/i,
+  ];
+
+  return PROCEED_PATTERNS.some(re => re.test(clean) || re.test(text.toLowerCase()));
+}
+
+// Find a matching job in database by ID, role + location, or unique role
+export function findMatchingJob(text, jobs) {
+  if (!text || typeof text !== 'string' || !Array.isArray(jobs) || jobs.length === 0) return null;
+  const lower = text.toLowerCase().trim();
+  const digits = westernDigits(lower);
+
+  // 1. Direct Job ID matching: e.g. "job 1", "job id 1", "job #1", "#1", "apply 1", "darkhwas 2"
+  const idMatch = digits.match(/(?:(?:job\s*(?:id|no|number)?|apply\s*(?:to|for|on)?|darkhwas[t]?|درخواست)\s*[:#]?\s*|^#\s*)(\d+)/i);
+  if (idMatch) {
+    const id = parseInt(idMatch[1], 10);
+    const found = jobs.find(j => j.id === id);
+    if (found) return found;
+  }
+
+  // 2. Both Role and Location match in text (e.g. "loader in qasimabad")
+  for (const job of jobs) {
+    if (!job.data) continue;
+    const role = (job.data.Role || '').toLowerCase();
+    const loc = (job.data.Location || '').toLowerCase();
+    if (role && loc && lower.includes(role) && lower.includes(loc)) {
+      return job;
+    }
+  }
+
+  // 3. Unique Role match in text (e.g. "loader", "painter")
+  const roleMatches = jobs.filter(j => j.data?.Role && lower.includes(j.data.Role.toLowerCase()));
+  if (roleMatches.length === 1) {
+    return roleMatches[0];
+  }
+
+  return null;
+}
 
 // Explicit language choice by word. Deliberately does NOT use 1/2/3 — those
 // are the marketplace menu in this bot and must stay free.

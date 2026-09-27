@@ -21,7 +21,8 @@ const ROMAN_STRONG = new Set([
   'kaun', 'kon', 'kyun', 'kion', 'hoga', 'hogi', 'honge', 'sakta', 'sakti',
   'sakte', 'tha', 'thi', 'thay', 'hain', 'hy', 'hyn', 'theek', 'thik',
   'kaam', 'paise', 'paisay', 'rupay', 'haan', 'walaikum', 'mazdoor',
-  'mazdoori', 'darkhwas',
+  'mazdoori', 'darkhwas', 'darkhwast', 'dihari', 'dihadi', 'dehari',
+  'karigar', 'mistri', 'thekedar', 'tankhwah', 'ujrat', 'rozgar', 'mulazmat',
 ]);
 
 // Short words that are also plausible English or typos. Score 1 each.
@@ -29,7 +30,7 @@ const ROMAN_WEAK = new Set([
   'hai', 'aur', 'or', 'mein', 'main', 'mera', 'meri', 'mere', 'tum', 'tumhe',
   'hum', 'woh', 'wo', 'ye', 'yeh', 'se', 'ko', 'ka', 'ki', 'ke', 'liye',
   'leye', 'gaya', 'gayi', 'gaye', 'kab', 'han', 'ji', 'na', 'ab', 'yahan',
-  'wahan', 'kam', 'mil', 'karo', 'kar', 'dena', 'do',
+  'wahan', 'kam', 'mil', 'karo', 'kar', 'dena', 'do', 'rs', 'pkr',
 ]);
 
 // Variant spellings collapsed to one canonical form, so detection scores the
@@ -40,7 +41,7 @@ const ROMAN_CANONICAL = {
   hai: ['hy', 'hae'],
   main: ['mein', 'mn', 'mai'],
   kaam: ['kam', 'kaj', 'kaaj'],
-  chahiye: ['chahye', 'chaiye', 'chahie', 'chaheye', 'chy'],
+  chahiye: ['chahye', 'chaiye', 'chahie', 'chaheye', 'chy', 'chahyen', 'chayie'],
   karna: ['krna', 'karnaa'],
   karta: ['krta'],
   karti: ['krti'],
@@ -51,13 +52,18 @@ const ROMAN_CANONICAL = {
   kahan: ['kaha', 'kahn'],
   mujhe: ['mujy', 'mujhay', 'muje', 'mje', 'mjhe'],
   tumhe: ['tumhy', 'tumhay', 'tje', 'tjhe'],
-  paise: ['paisa', 'paisay', 'rupay', 'rupaye'],
+  paise: ['paisa', 'paisay', 'rupay', 'rupaye', 'rupee', 'rupees'],
   zaroorat: ['zrurt', 'zarurat'],
   haan: ['han', 'haa'],
   shukriya: ['shukria', 'shukrya'],
   salam: ['assalam', 'aslam', 'slm'],
   ilaqa: ['area', 'mohalla', 'ilaaka'],
-  mazdoor: ['mazdoori'],
+  mazdoor: ['mazdoori', 'labour', 'laborer', 'mazdor'],
+  dihari: ['dihadi', 'dehari', 'dehadi'],
+  karigar: ['kareegar', 'kaarigar'],
+  mistri: ['mistry'],
+  thekedar: ['thekedaar'],
+  tankhwah: ['tankha', 'tankwah', 'ujrat'],
 };
 
 const VARIANT_LOOKUP = new Map();

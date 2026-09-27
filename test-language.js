@@ -8,6 +8,7 @@ import assert from 'node:assert/strict';
 import {
   localeFor, detectLanguage, parseLanguageChoice, sanitizeForWhatsApp,
   westernDigits, normalizeRoman, MENU_WORDS, BROWSE_WORDS, APPLY_RE,
+  isProceedOrAffirmation, findMatchingJob,
 } from './language.js';
 import { t, fmt, renderFields, missingKeys } from './messages.js';
 
@@ -99,6 +100,29 @@ check('apply with no number matches but yields no index', () => {
 });
 check('a normal sentence is not mistaken for a command', () => {
   assert.equal('i applied for a job last week'.match(APPLY_RE), null);
+});
+check('isProceedOrAffirmation recognizes natural confirmation in all styles', () => {
+  assert.ok(isProceedOrAffirmation('jee mujhe is job k liye apply krna hai'));
+  assert.ok(isProceedOrAffirmation('id like to proceed'));
+  assert.ok(isProceedOrAffirmation('proceed'));
+  assert.ok(isProceedOrAffirmation('theek hai'));
+  assert.ok(isProceedOrAffirmation('haan apply kar do'));
+  assert.ok(isProceedOrAffirmation('is job pe apply karna hai'));
+  assert.ok(!isProceedOrAffirmation('kya aap mujhe jobs dikha sktay hain'));
+  assert.ok(!isProceedOrAffirmation('i applied for a job last week'));
+});
+check('findMatchingJob matches job by ID, role and location', () => {
+  const sampleJobs = [
+    { id: 1, data: { Role: 'loader', Location: 'qasimabad' } },
+    { id: 2, data: { Role: 'labourer', Location: 'Karachi' } },
+    { id: 3, data: { Role: 'Painter', Location: 'Hyderabad' } }
+  ];
+  assert.equal(findMatchingJob('loader in qasimabad', sampleJobs)?.id, 1);
+  assert.equal(findMatchingJob('job id 1', sampleJobs)?.id, 1);
+  assert.equal(findMatchingJob('apply 1', sampleJobs)?.id, 1);
+  assert.equal(findMatchingJob('#3', sampleJobs)?.id, 3);
+  assert.equal(findMatchingJob('painter', sampleJobs)?.id, 3);
+  assert.equal(findMatchingJob('hello', sampleJobs), null);
 });
 check('language words never collide with the 1/2/3 marketplace menu', () => {
   assert.equal(parseLanguageChoice('3'), null);

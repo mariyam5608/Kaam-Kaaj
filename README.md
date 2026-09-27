@@ -4,6 +4,8 @@ A WhatsApp bot that gets people in Hyderabad, Sindh work — without asking any 
 
 Built for [Imaginathon](https://www.banao.pk/imaginathon/) by banao.pk. Team **HM^2**.
 
+**[🎥 Watch Live Demo (Google Drive)](https://drive.google.com/drive/folders/1dVoasdcCZ3Rz2WOSTqXyVt_Lk9AOpeuc)** &bull; **[💬 Connect on WhatsApp](https://wa.me/966554049427)** &bull; **[💻 GitHub Repository](https://github.com/mariyam5608/Kaam-Kaaj)** &bull; **[🌐 Deployed Webpage](https://kaamkaaj-whatsapp.vercel.app)**
+
 ---
 
 ## Why we built this

@@ -30,7 +30,10 @@ const MESSAGES = {
     browseEmpty: '📭 No active jobs available right now.',
     browseHeader: '📋 *Available Active Jobs:*',
     browseJobHeader: '🆔 *Job ID: #{n}*',
-    browseFooter: '💬 To apply, type: *apply [Job ID]* (e.g. *apply 1* or *#1*)',
+    browseFooter: '💬 To apply, reply with the job number or name (e.g. *apply 1*, *#1*, or *loader*)',
+    jobSelectedPrompt:
+      '📌 *{role}* in {location} [Job ID: #{id}, {fare}]\n\n' +
+      'Would you like to apply for this job? Reply *yes* or *apply {id}*.',
     applyEmployer:
       '🔔 *New Application!*\n\n' +
       'A worker wants to contact you about your job (*{role}*) [Job ID: #{id}].\n\n' +
@@ -42,7 +45,7 @@ const MESSAGES = {
     voiceError:
       '❌ The audio was not clear. Please send the voice note again or type your message.',
     aiUnavailable:
-      'Thanks! Please describe what you need in a little more detail, or send a voice note (e.g. "I need a loader in Qasimabad at 1000/day").',
+      'Thanks! Please describe what you need in a little more detail, or send a voice note (e.g. "I need a loader in Qasimabad at Rs. 1000/day").',
     langSwitched: 'Got it — English it is from now on 🙂',
   },
 
@@ -62,7 +65,10 @@ const MESSAGES = {
     browseEmpty: '📭 Filhal koi active job available nahi hai.',
     browseHeader: '📋 *Available Active Jobs:*',
     browseJobHeader: '🆔 *Job ID: #{n}*',
-    browseFooter: '💬 Apply karne ke liye likhein: *apply [Job ID]* (misal: *apply 1* ya *#1*)',
+    browseFooter: '💬 Apply karne ke liye job ka number ya naam likhein (misal: *apply 1*, *#1*, ya *loader*)',
+    jobSelectedPrompt:
+      '📌 *{role}* in {location} mil gayi [Job ID: #{id}, {fare}]\n\n' +
+      'Kya aap is job ke liye apply karna chahte hain? Likhein: *haan* ya *apply {id}*.',
     applyEmployer:
       '🔔 *Nayi Application!*\n\n' +
       'Ek worker aap ki job (*{role}*) [Job ID: #{id}] ke liye rabta karna chahta hai.\n\n' +
@@ -74,7 +80,7 @@ const MESSAGES = {
     voiceError:
       '❌ Awaaz saaf nahi aayi. Baraye meherbani dubara voice note bhejein ya text likhein.',
     aiUnavailable:
-      'Shukriya! Apni zaroorat tafseel se likhein ya voice note bhejein (misal: "Mujhe Qasimabad mein 1000/day par loader chahiye").',
+      'Shukriya! Apni zaroorat tafseel se likhein ya voice note bhejein (misal: "Mujhe Qasimabad mein Rs. 1000 dihari par loader chahiye").',
     langSwitched: 'Theek hai, ab se Roman Urdu mein baat hogi 🙂',
   },
 
@@ -94,7 +100,10 @@ const MESSAGES = {
     browseEmpty: '📭 فی الحال کوئی فعال کام دستیاب نہیں ہے۔',
     browseHeader: '📋 *دستیاب فعال کام:*',
     browseJobHeader: '🆔 *جاب آئی ڈی: #{n}*',
-    browseFooter: '💬 درخواست دینے کے لیے لکھیں: *apply [جاب آئی ڈی]* (مثلاً *apply 1* یا *#1*)',
+    browseFooter: '💬 درخواست دینے کے لیے کام کا نمبر یا نام لکھیں (مثلاً *apply 1*، *#1*، یا *loader*)',
+    jobSelectedPrompt:
+      '📌 *{role}* ({location}) کا کام مل گیا [جاب آئی ڈی: #{id}، {fare}]\n\n' +
+      'کیا آپ اس کام کے لیے درخواست دینا چاہتے ہیں؟ لکھیں: *ہاں* یا *apply {id}*۔',
     applyEmployer:
       '🔔 *نئی درخواست!*\n\n' +
       'ایک ورکر آپ کے کام (*{role}*) [جاب آئی ڈی: #{id}] کے لیے رابطہ کرنا چاہتا ہے۔\n\n' +
@@ -106,7 +115,7 @@ const MESSAGES = {
     voiceError:
       '❌ آواز صاف نہیں آئی۔ براہِ کرم دوبارہ وائس نوٹ بھیجیں یا تحریر لکھیں۔',
     aiUnavailable:
-      'شکریہ! اپنی ضرورت تفصیل سے لکھیں یا وائس نوٹ بھیجیں (مثلاً: "مجھے قاسم آباد میں 1000 یومیہ پر لوڈر چاہیے")۔',
+      'شکریہ! اپنی ضرورت تفصیل سے لکھیں یا وائس نوٹ بھیجیں (مثلاً: "مجھے قاسم آباد میں 1000 روپے دیہاڑی پر لوڈر چاہیے")۔',
     langSwitched: 'ٹھیک ہے، اب سے اردو میں بات ہوگی 🙂',
   },
 };
@@ -117,21 +126,21 @@ const FIELD_LABELS = {
   en: {
     Role: 'Role', Location: 'Location', Salary: 'Salary', Hours: 'Hours',
     Name: 'Name', Age: 'Age', Skills: 'Skills',
-    'Working hours': 'Working hours', 'Salary/Fare': 'Salary/Fare',
+    'Working hours': 'Working hours', 'Salary/Fare': 'Salary/Fare (Rs.)',
     'Special requirements': 'Special requirements',
     'Available hours': 'Available hours', 'Skills/Experience': 'Skills/Experience',
   },
   roman: {
     Role: 'Kaam', Location: 'Ilaqa', Salary: 'Tankhwah', Hours: 'Auqat',
     Name: 'Naam', Age: 'Umar', Skills: 'Hunar',
-    'Working hours': 'Kaam ke auqat', 'Salary/Fare': 'Tankhwah / kiraya',
+    'Working hours': 'Kaam ke auqat', 'Salary/Fare': 'Tankhwah / Dihari (Rs.)',
     'Special requirements': 'Khaas shartein',
     'Available hours': 'Dastiyab auqat', 'Skills/Experience': 'Hunar / tajurba',
   },
   ur: {
     Role: 'کام', Location: 'علاقہ', Salary: 'تنخواہ', Hours: 'اوقات',
     Name: 'نام', Age: 'عمر', Skills: 'ہنر',
-    'Working hours': 'کام کے اوقات', 'Salary/Fare': 'تنخواہ / کرایہ',
+    'Working hours': 'کام کے اوقات', 'Salary/Fare': 'تنخواہ / دیہاڑی (روپے)',
     'Special requirements': 'خاص شرائط',
     'Available hours': 'دستیاب اوقات', 'Skills/Experience': 'ہنر / تجربہ',
   },
