@@ -113,11 +113,14 @@ export const MENU_WORDS = new Set([
   'aoa', 'adaab', 'مینو', 'السلام علیکم', 'آداب',
 ].map(normalizeRoman));
 
-export const BROWSE_WORDS = new Set(['3', 'jobs', 'browse', 'نوکریاں'].map(normalizeRoman));
+export const BROWSE_WORDS = new Set([
+  '3', 'jobs', 'browse', 'list', 'job list', 'jobs list', 'joblist',
+  'list bhejdein', 'list bhejo', 'kaam ki list', 'نوکریاں', 'کام'
+].map(normalizeRoman));
 
-// "apply 1" / "darkhwas 2" / "درخواست 3" — run westernDigits() on the message
-// first or Urdu-script numerals will never match.
-export const APPLY_RE = /^(?:apply|darkhwas|درخواست)\s*(\d*)/;
+// "apply 1" / "apply #1" / "#1" / "darkhwas 2" / "درخواست 3" / "job 1"
+// run westernDigits() on the message first or Urdu-script numerals will never match.
+export const APPLY_RE = /^(?:apply|darkhwas|درخواست|job)\s*#?\s*(\d*)|^\s*#\s*(\d+)/i;
 
 // Explicit language choice by word. Deliberately does NOT use 1/2/3 — those
 // are the marketplace menu in this bot and must stay free.

@@ -51,7 +51,21 @@ function loadDB() {
         if (!fs.existsSync(DB_FILE)) {
             fs.writeFileSync(DB_FILE, JSON.stringify({ jobs: [], workers: [] }, null, 2));
         }
-        return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+        const data = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+        let modified = false;
+        if (Array.isArray(data.jobs)) {
+            data.jobs = data.jobs.filter(j => j && j.data && Object.keys(j.data).length > 0);
+            data.jobs.forEach((j, i) => {
+                if (!j.id) {
+                    j.id = i + 1;
+                    modified = true;
+                }
+            });
+        }
+        if (modified) {
+            fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+        }
+        return data;
     } catch {
         return { jobs: [], workers: [] };
     }
@@ -63,12 +77,25 @@ function saveDB(data) {
 
 // Resilient AI Chat Completion with Auto-Fallback
 async function getAIIntent(userPrompt, locale = 'roman') {
+    const db = loadDB();
+    const activeJobsSummary = (db.jobs || [])
+        .map(j => `Job ID #${j.id}: ${j.data.Role || 'Worker'} in ${j.data.Location || 'Hyderabad'}`)
+        .join(', ');
+
     const systemPrompt = `You are an AI assistant for a local labour marketplace in Hyderabad, Sindh. Users write in Urdu script, Roman Urdu, or English.
+
+ACTIVE JOBS IN DATABASE: ${activeJobsSummary || 'None currently'}.
 
 Output ONLY a valid JSON object with these exact keys:
 - "intent": "HIRING" | "SEEKING" | "BROWSE" | "CHAT"
 - "reply": one short, warm sentence to the user
 - "extractedData": object with ONLY these keys, written exactly like this in English regardless of the user's language: Role, Location, Salary, Hours, Name, Age, Skills. Leave a value as "" when the user did not say it. Keep the user's own words and script inside the values.
+
+INTENT RULES:
+- If user wants to see jobs, find work, asks for the job list, or writes "list", set "intent": "BROWSE".
+- If user wants to hire, post a job, or needs workers, set "intent": "HIRING".
+- If user gives their worker profile details (skills, age, looking for job), set "intent": "SEEKING".
+- If user asks about a specific job from the list or asks how to apply, set "intent": "CHAT" and in "reply" tell them the exact Job ID (e.g. Job ID #1, Job ID #2) and tell them to type "apply [Job ID]" (e.g. "apply 1" or "#1").
 
 LANGUAGE RULES - these matter more than anything else:
 1. MIRROR THE USER. If they wrote Roman Urdu, reply in Roman Urdu. If they wrote اردو, reply in اردو. If they wrote English, reply in English.
@@ -111,6 +138,23 @@ ${languageDirective(locale)}`;
         reply: t(locale, 'aiUnavailable'),
         extractedData: {}
     };
+}
+
+async function sendBrowseJobs(sock, senderID, db, locale) {
+    const validJobs = (db.jobs || []).filter(j => j && j.data && Object.keys(j.data).length > 0);
+    if (validJobs.length === 0) {
+        await sock.sendMessage(senderID, { text: t(locale, 'browseEmpty') });
+        return;
+    }
+    let response = `${t(locale, 'browseHeader')}\n\n`;
+    validJobs.forEach((job, index) => {
+        const jobId = job.id || (index + 1);
+        response += `${fmt(t(locale, 'browseJobHeader'), { n: jobId })}\n`;
+        response += `${renderFields(locale, job.data)}\n`;
+        response += `-------------------\n`;
+    });
+    response += `\n${t(locale, 'browseFooter')}`;
+    await sock.sendMessage(senderID, { text: response });
 }
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -219,24 +263,35 @@ async function startWhatsAppGateway() {
             return;
         }
 
-        // Command: Apply to Job (e.g., "apply 1" / "درخواست 1")
+        // Command: Apply to Job (e.g., "apply 1" / "apply #3" / "#3" / "job 2" / "درخواست 1")
         const applyMatch = lowerText.match(APPLY_RE);
         if (applyMatch) {
-            const jobIndex = parseInt(applyMatch[1], 10) - 1;
+            const rawId = applyMatch[1] ?? applyMatch[2] ?? '';
+            const targetId = parseInt(rawId, 10);
 
-            if (!isNaN(jobIndex) && db.jobs[jobIndex]) {
-                const targetJob = db.jobs[jobIndex];
+            // Match by permanent Job ID first, then fallback to index
+            const targetJob = !isNaN(targetId) && (db.jobs.find(j => j.id === targetId) || db.jobs[targetId - 1]);
+
+            if (targetJob && targetJob.data && Object.keys(targetJob.data).length > 0) {
+                const jobId = targetJob.id || targetId;
+                const role = targetJob.data['Role'] || 'Job';
 
                 // Notify Employer — in the employer's own language, not the applicant's
                 await sock.sendMessage(targetJob.employerID, {
                     text: fmt(t(localeOf(targetJob.employerID), 'applyEmployer'), {
-                        role: targetJob.data['Role'] || 'Job',
+                        role,
+                        id: jobId,
                         num: senderID.split('@')[0],
                     })
                 });
 
                 // Confirm Worker
-                await sock.sendMessage(senderID, { text: t(locale, 'applyWorker') });
+                await sock.sendMessage(senderID, {
+                    text: fmt(t(locale, 'applyWorker'), {
+                        role,
+                        id: jobId,
+                    })
+                });
             } else {
                 await sock.sendMessage(senderID, { text: t(locale, 'applyError') });
             }
@@ -245,18 +300,7 @@ async function startWhatsAppGateway() {
 
         // Command: Explicit Browse Jobs
         if (BROWSE_WORDS.has(norm)) {
-            if (db.jobs.length === 0) {
-                await sock.sendMessage(senderID, { text: t(locale, 'browseEmpty') });
-                return;
-            }
-            let response = `${t(locale, 'browseHeader')}\n\n`;
-            db.jobs.forEach((job, index) => {
-                response += `${fmt(t(locale, 'browseJobHeader'), { n: index + 1 })}\n`;
-                response += `${renderFields(locale, job.data)}\n`;
-                response += `-------------------\n`;
-            });
-            response += `\n${t(locale, 'browseFooter')}`;
-            await sock.sendMessage(senderID, { text: response });
+            await sendBrowseJobs(sock, senderID, db, locale);
             return;
         }
 
@@ -276,10 +320,11 @@ async function startWhatsAppGateway() {
         );
 
         if (aiResult.intent === 'HIRING' && Object.keys(cleaned).length > 0) {
-            db.jobs.push({ employerID: senderID, data: cleaned, timestamp: new Date().toISOString() });
+            const nextId = db.jobs.reduce((max, j) => Math.max(max, j.id || 0), 0) + 1;
+            db.jobs.push({ id: nextId, employerID: senderID, data: cleaned, timestamp: new Date().toISOString() });
             saveDB(db);
             await sock.sendMessage(senderID, {
-                text: `${t(locale, 'jobPostedTitle')}\n\n` +
+                text: `${fmt(t(locale, 'jobPostedTitle'), { id: nextId })}\n\n` +
                       `${renderFields(locale, cleaned)}\n\n` +
                       t(locale, 'jobPostedFooter')
             });
@@ -292,6 +337,9 @@ async function startWhatsAppGateway() {
                       `${renderFields(locale, cleaned)}\n\n` +
                       t(locale, 'workerSavedFooter')
             });
+        }
+        else if (aiResult.intent === 'BROWSE') {
+            await sendBrowseJobs(sock, senderID, db, locale);
         }
         else {
             // Friendly fallback response from AI

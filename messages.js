@@ -23,22 +23,22 @@ const MESSAGES = {
       '*3️⃣* See Available Jobs 🔍\n\n' +
       '*(Tell us what you need by voice note or text)*\n\n' +
       '_(Change language: type *urdu*, *roman* or *english*)_',
-    jobPostedTitle: '✅ *Your Job Has Been Posted!*',
+    jobPostedTitle: '✅ *Your Job Has Been Posted!* (Job ID: #{id})',
     jobPostedFooter: 'To see active jobs type *3* or *jobs*.',
     workerSavedTitle: '✅ *Your Worker Profile Is Ready!*',
     workerSavedFooter: 'To see jobs and apply, type *3* or *jobs*.',
     browseEmpty: '📭 No active jobs available right now.',
     browseHeader: '📋 *Available Active Jobs:*',
-    browseJobHeader: '*Job #{n}*',
-    browseFooter: '💬 To apply, type: *apply [Job Number]* (e.g. *apply 1*)',
+    browseJobHeader: '🆔 *Job ID: #{n}*',
+    browseFooter: '💬 To apply, type: *apply [Job ID]* (e.g. *apply 1* or *#1*)',
     applyEmployer:
       '🔔 *New Application!*\n\n' +
-      'A worker wants to contact you about your job (*{role}*).\n\n' +
+      'A worker wants to contact you about your job (*{role}*) [Job ID: #{id}].\n\n' +
       '📱 Direct WhatsApp Link: wa.me/{num}',
     applyWorker:
-      '✅ Your application has been sent to the employer! ' +
+      '✅ Your application for Job #{id} ({role}) has been sent to the employer! ' +
       'They will contact you directly on WhatsApp.',
-    applyError: '❌ Write a correct job number. Example: *apply 1*',
+    applyError: '❌ Please write a valid Job ID. Example: *apply 1* or *#1*',
     voiceError:
       '❌ The audio was not clear. Please send the voice note again or type your message.',
     aiUnavailable:
@@ -55,22 +55,22 @@ const MESSAGES = {
       '*3️⃣* Available Jobs Dekhein 🔍\n\n' +
       '*(Voice note ya text mein apni zaroorat batayein)*\n\n' +
       '_(Zaban badalne ke liye likhein: *urdu*, *roman* ya *english*)_',
-    jobPostedTitle: '✅ *Aap Ki Job Post Ho Gayi!*',
+    jobPostedTitle: '✅ *Aap Ki Job Post Ho Gayi!* (Job ID: #{id})',
     jobPostedFooter: 'Active jobs dekhne ke liye *3* ya *jobs* likhein.',
     workerSavedTitle: '✅ *Aap Ki Worker Profile Ban Gayi!*',
     workerSavedFooter: 'Jobs dekhne aur apply karne ke liye *3* ya *jobs* likhein.',
     browseEmpty: '📭 Filhal koi active job available nahi hai.',
     browseHeader: '📋 *Available Active Jobs:*',
-    browseJobHeader: '*Job #{n}*',
-    browseFooter: '💬 Apply karne ke liye likhein: *apply [Job Number]* (e.g. *apply 1*)',
+    browseJobHeader: '🆔 *Job ID: #{n}*',
+    browseFooter: '💬 Apply karne ke liye likhein: *apply [Job ID]* (misal: *apply 1* ya *#1*)',
     applyEmployer:
       '🔔 *Nayi Application!*\n\n' +
-      'Ek worker aap ki job (*{role}*) ke liye rabta karna chahta hai.\n\n' +
+      'Ek worker aap ki job (*{role}*) [Job ID: #{id}] ke liye rabta karna chahta hai.\n\n' +
       '📱 Direct WhatsApp Link: wa.me/{num}',
     applyWorker:
-      '✅ Aap ki darkhwas employer ko bhej di gayi hai! ' +
+      '✅ Aap ki darkhwas Job #{id} ({role}) ke employer ko bhej di gayi hai! ' +
       'Wo aapse direct WhatsApp par rabta karein ge.',
-    applyError: '❌ Sahi job number likhein. Misal: *apply 1*',
+    applyError: '❌ Sahi Job ID likhein. Misal: *apply 1* ya *#1*',
     voiceError:
       '❌ Awaaz saaf nahi aayi. Baraye meherbani dubara voice note bhejein ya text likhein.',
     aiUnavailable:
@@ -87,22 +87,22 @@ const MESSAGES = {
       '*3️⃣* دستیاب کام دیکھیں 🔍\n\n' +
       '*(وائس نوٹ یا تحریر میں اپنی ضرورت بتائیں)*\n\n' +
       '_(زبان بدلنے کے لیے لکھیں: *اردو*، *رومن* یا *انگریزی*)_',
-    jobPostedTitle: '✅ *آپ کا کام پوسٹ ہو گیا!*',
+    jobPostedTitle: '✅ *آپ کا کام پوسٹ ہو گیا!* (جاب آئی ڈی: #{id})',
     jobPostedFooter: 'دستیاب کام دیکھنے کے لیے *3* یا *jobs* لکھیں۔',
     workerSavedTitle: '✅ *آپ کی ورکر پروفائل بن گئی!*',
     workerSavedFooter: 'کام دیکھنے اور درخواست دینے کے لیے *3* یا *jobs* لکھیں۔',
     browseEmpty: '📭 فی الحال کوئی فعال کام دستیاب نہیں ہے۔',
     browseHeader: '📋 *دستیاب فعال کام:*',
-    browseJobHeader: '*کام #{n}*',
-    browseFooter: '💬 درخواست دینے کے لیے لکھیں: *apply [نمبر]* (مثلاً *apply 1*)',
+    browseJobHeader: '🆔 *جاب آئی ڈی: #{n}*',
+    browseFooter: '💬 درخواست دینے کے لیے لکھیں: *apply [جاب آئی ڈی]* (مثلاً *apply 1* یا *#1*)',
     applyEmployer:
       '🔔 *نئی درخواست!*\n\n' +
-      'ایک ورکر آپ کے کام (*{role}*) کے لیے رابطہ کرنا چاہتا ہے۔\n\n' +
+      'ایک ورکر آپ کے کام (*{role}*) [جاب آئی ڈی: #{id}] کے لیے رابطہ کرنا چاہتا ہے۔\n\n' +
       '📱 Direct WhatsApp Link: wa.me/{num}',
     applyWorker:
-      '✅ آپ کی درخواست employer کو بھیج دی گئی ہے! ' +
+      '✅ آپ کی درخواست کام #{id} ({role}) کے employer کو بھیج دی گئی ہے! ' +
       'وہ آپ سے براہِ راست WhatsApp پر رابطہ کریں گے۔',
-    applyError: '❌ درست job number لکھیں۔ مثال: *apply 1*',
+    applyError: '❌ درست جاب آئی ڈی لکھیں۔ مثال: *apply 1* یا *#1*',
     voiceError:
       '❌ آواز صاف نہیں آئی۔ براہِ کرم دوبارہ وائس نوٹ بھیجیں یا تحریر لکھیں۔',
     aiUnavailable:
