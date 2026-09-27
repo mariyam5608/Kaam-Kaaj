@@ -30,10 +30,9 @@ const DB_FILE = './database.json';
 
 const groq = new Groq({ apiKey: GROQ_API_KEY });
 
-// Fallback order: the 70B follows Urdu-script and Roman-Urdu instructions far
-// better than the smaller models; if it rate-limits we fall through to the two
-// this bot has always used.
-const TEXT_MODELS = ['meta-llama/llama-3.3-70b-versatile', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b'];
+// Fallback order: the 120B mirrors Urdu script and Roman Urdu most reliably;
+// the two smaller models are there for when it rate-limits mid-demo.
+const TEXT_MODELS = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b'];
 const AUDIO_MODEL = 'whisper-large-v3-turbo';
 
 // One locale per sender: 'en' | 'roman' | 'ur'. Defaults to Roman Urdu, the
@@ -95,7 +94,10 @@ ${languageDirective(locale)}`;
                 ],
                 response_format: { type: "json_object" },
                 // Urdu answers run longer than Roman ones; 250 truncated them.
-                max_tokens: 400
+                // Reasoning models also spend part of this budget thinking
+                // before they write anything, and 400 came back empty.
+                max_tokens: 900,
+                ...(model.startsWith('openai/gpt-oss') ? { reasoning_effort: 'low' } : {})
             });
 
             return JSON.parse(completion.choices[0].message.content);

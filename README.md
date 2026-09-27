@@ -45,10 +45,11 @@ This is harder than it sounds, and the failure mode is embarrassing: ask a small
 language model for Urdu and it will happily hand you Hindi in Devanagari script
 — काम, चहिए — which looks almost right at a glance and is completely wrong to
 anyone who reads it. We spent most of our time on exactly that. The fixes were
-a model large enough to hold the distinction (`llama-3.3-70b-versatile` is the
-smallest that does it reliably), an explicit ban on Devanagari in the prompt,
-and putting the language instruction *last* in the system prompt, where models
-weight it most heavily.
+a model large enough to hold the distinction (we are on `openai/gpt-oss-120b`
+today — Groq retired the `llama-3.3-70b-versatile` we started on, and the small
+models drift), an explicit ban on Devanagari in the prompt, and putting the
+language instruction *last* in the system prompt, where models weight it most
+heavily.
 
 Two details we would not have thought of on day one:
 

@@ -14,7 +14,7 @@ const {
 } = require("./language");
 const { t } = require("./messages");
 
-const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+const GROQ_MODEL = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
 
 // Personality / instructions for the bot. Edit this freely via SYSTEM_PROMPT.
 const SYSTEM_PROMPT =
@@ -176,7 +176,10 @@ async function getAIReply(from, userText) {
       model: GROQ_MODEL,
       messages,
       temperature: 0.8,
-      max_tokens: 400,
+      // Reasoning models spend part of this budget thinking before they write,
+      // so it has to cover both the thinking and the reply.
+      max_tokens: 900,
+      ...(GROQ_MODEL.startsWith("openai/gpt-oss") && { reasoning_effort: "low" }),
     }),
   });
 
@@ -187,9 +190,9 @@ async function getAIReply(from, userText) {
   }
 
   const data = await response.json();
-  const raw = data.choices?.[0]?.message?.content?.trim() || "...";
+  const raw = data.choices?.[0]?.message?.content?.trim() || "";
 
-  history.push({ role: "assistant", content: raw });
+  if (raw) history.push({ role: "assistant", content: raw });
   await saveHistory(from, history);
   return sanitizeForWhatsApp(raw) || t(locale, "aiUnavailable");
 }
