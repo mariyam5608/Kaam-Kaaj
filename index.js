@@ -4,7 +4,7 @@ import qrcode from 'qrcode-terminal';
 import pino from 'pino';
 import fs from 'fs';
 import { Groq } from 'groq-sdk';
-import { localeFor, normalizeRoman, parseLanguageChoice, languageDirective, sanitizeForWhatsApp, westernDigits, MENU_WORDS, BROWSE_WORDS, APPLY_RE } from './language.js';
+import { localeFor, normalizeRoman, parseLanguageChoice, languageDirective, sanitizeForWhatsApp, sanitizeInput, westernDigits, MENU_WORDS, BROWSE_WORDS, APPLY_RE } from './language.js';
 import { t, fmt, renderFields, missingKeys } from './messages.js';
 
 // ------------------- CONFIGURATION -------------------
@@ -161,7 +161,7 @@ async function startWhatsAppGateway() {
 
         // 1. Process Text Input
         if (m.message.conversation || m.message.extendedTextMessage) {
-            messageText = (m.message.conversation || m.message.extendedTextMessage?.text || '').trim();
+            messageText = sanitizeInput(m.message.conversation || m.message.extendedTextMessage?.text || '');
         } 
         // 2. Process Voice Note Input
         else if (m.message.audioMessage) {
@@ -177,7 +177,7 @@ async function startWhatsAppGateway() {
                     language: 'ur'
                 });
 
-                messageText = transcription.text;
+                messageText = sanitizeInput(transcription.text);
                 console.log(`🗣️ Transcribed Voice Note: "${messageText}"`);
             } catch (err) {
                 console.error('Audio Transcription Error:', err.message);
@@ -268,8 +268,11 @@ async function startWhatsAppGateway() {
         // blanks is what filled database.json with empty bullets.
         const cleaned = Object.fromEntries(
             Object.entries(aiResult.extractedData || {})
-                .map(([k, v]) => [k, sanitizeForWhatsApp(String(v ?? '')).slice(0, 200)])
-                .filter(([, v]) => v !== '')
+                .map(([k, v]) => [
+                    sanitizeInput(String(k ?? ''), 50),
+                    sanitizeForWhatsApp(sanitizeInput(String(v ?? ''), 200))
+                ])
+                .filter(([k, v]) => k !== '' && v !== '')
         );
 
         if (aiResult.intent === 'HIRING' && Object.keys(cleaned).length > 0) {

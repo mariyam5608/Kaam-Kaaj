@@ -11,6 +11,7 @@ const {
   languageDirective,
   localeFor,
   sanitizeForWhatsApp,
+  sanitizeInput,
 } = require("./language");
 const { t } = require("./messages");
 
@@ -157,10 +158,12 @@ function buildSystemPrompt(locale) {
 // ---- Groq ----------------------------------------------------------------
 
 async function getAIReply(from, userText) {
+  const cleanText = sanitizeInput(userText);
+  if (!cleanText) return "";
   const history = await getHistory(from);
-  history.push({ role: "user", content: userText });
+  history.push({ role: "user", content: cleanText });
 
-  const locale = localeFrom(history, userText);
+  const locale = localeFrom(history, cleanText);
   const messages = [
     { role: "system", content: buildSystemPrompt(locale) },
     ...history,
@@ -243,7 +246,8 @@ async function handleIncoming(body) {
 
   if (!message) return; // a status update (sent/delivered/read), not a message
 
-  const from = message.from; // sender's number, no "+"
+  const rawFrom = message.from; // sender's number, no "+"
+  const from = String(rawFrom || "").replace(/\D/g, "");
 
   if (!ALLOWED_NUMBERS.includes(from)) {
     console.log(`Ignored message from unauthorized number: ${from}`);
@@ -261,11 +265,14 @@ async function handleIncoming(body) {
     return;
   }
 
-  const userText = message.text.body;
+  const userText = sanitizeInput(message.text?.body);
+  if (!userText) return;
   console.log(`Message from ${from}: ${userText}`);
 
   const reply = await getAIReply(from, userText);
-  await sendWhatsAppMessage(from, reply);
+  if (reply) {
+    await sendWhatsAppMessage(from, reply);
+  }
 }
 
 module.exports = {

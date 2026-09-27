@@ -191,3 +191,13 @@ export function westernDigits(text) {
     String(d.charCodeAt(0) - (d >= '\u06F0' ? 0x06f0 : 0x0660))
   );
 }
+
+// Sanitizes incoming user text: strips control characters, normalizes unicode, trims, and bounds length.
+export function sanitizeInput(text, maxLength = 1000) {
+  if (typeof text !== 'string') return '';
+  return text
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+    .normalize('NFC')
+    .trim()
+    .slice(0, maxLength);
+}

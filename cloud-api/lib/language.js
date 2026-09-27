@@ -175,6 +175,16 @@ function sanitizeForWhatsApp(text) {
   return out;
 }
 
+// Sanitizes incoming user text: strips control characters, normalizes unicode, trims, and bounds length.
+function sanitizeInput(text, maxLength = 1000) {
+  if (typeof text !== 'string') return '';
+  return text
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+    .normalize('NFC')
+    .trim()
+    .slice(0, maxLength);
+}
+
 module.exports = {
   LANGUAGE_RULES,
   detectLanguage,
@@ -182,4 +192,5 @@ module.exports = {
   localeFor,
   normalizeRoman,
   sanitizeForWhatsApp,
+  sanitizeInput,
 };
