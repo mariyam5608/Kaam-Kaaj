@@ -1,0 +1,6 @@
+{
+  "framework": null,
+  "rewrites": [
+    { "source": "/webhook", "destination": "/api/webhook" }
+  ]
+}
